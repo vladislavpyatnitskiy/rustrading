@@ -35,7 +35,7 @@ rus.monte.carlo <- function(x, ndays, n){ # Monte Carlo Simulation
     p <- melt(p, id.vars = "days")
     
     # Make Line Charts with all scenarious
-    monte_graph <- ggplot(p, aes(x=days,y=(value - 1) * 100, col=variable)) +
+    plt <- ggplot(p, aes(x=days,y=(value - 1) * 100, col=variable)) +
       geom_line() +
       theme_bw() +
       theme(legend.position = "none") +
@@ -52,7 +52,7 @@ rus.monte.carlo <- function(x, ndays, n){ # Monte Carlo Simulation
     
     Av <- c(Av, as.vector(mean((p$value[p$days] - 1) * 100 < 0))) # Join
     
-    Plots <- list(Plots, monte_graph) } # Add plots to list
+    if (is.null(Plots)){ Plots <- plt } else { Plots <- list(Plots, plt) } }
   
   names(Av) <- x # Assign names
   
