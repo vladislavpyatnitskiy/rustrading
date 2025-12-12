@@ -14,8 +14,11 @@ Fig. 3. Relative Strength Index
   Ticker      RSI Signal
 1   GMKN 63.84789   Hold
 ```
+![](https://github.com/vladislavpyatnitskiy/rustrading/blob/main/Plots/Bollinger%20Bands%20TA%20Plot.png?raw=true)
+Fig. 4. Bollinger Bands
+
 ![](https://github.com/vladislavpyatnitskiy/rustrading/blob/main/Plots/Parametric%20VaR.png?raw=true)
-Fig. 4. Line Plot of Stock Volatility with Parametric VaR
+Fig. 5. Line Plot of Stock Volatility with Parametric VaR
 
 ![](https://github.com/vladislavpyatnitskiy/rustrading/blob/main/Plots/Monte%20Carlo.png?raw=true)
-Fig. 5. Monte Carlo Simulation for Russian Stocks
+Fig. 6. Monte Carlo Simulation for Russian Stocks
