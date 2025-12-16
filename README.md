@@ -17,8 +17,11 @@ Fig. 3. Relative Strength Index
 ![](https://github.com/vladislavpyatnitskiy/rustrading/blob/main/Plots/Bollinger%20Bands%20TA%20Plot.png?raw=true)
 Fig. 4. Bollinger Bands
 
+![](https://github.com/vladislavpyatnitskiy/rustrading/blob/main/Plots/MACD%20Plot%20Rus.png?raw=true)
+Fig. 5. Moving Average Convergence Divergence 
+
 ![](https://github.com/vladislavpyatnitskiy/rustrading/blob/main/Plots/Parametric%20VaR.png?raw=true)
-Fig. 5. Line Plot of Stock Volatility with Parametric VaR
+Fig. 6. Line Plot of Stock Volatility with Parametric VaR
 
 ![](https://github.com/vladislavpyatnitskiy/rustrading/blob/main/Plots/Monte%20Carlo.png?raw=true)
-Fig. 6. Monte Carlo Simulation for Russian Stocks
+Fig. 7. Monte Carlo Simulation for Russian Stocks
