@@ -13,6 +13,13 @@ lines.plt.ma.rus <- function(x, s=NULL, e=NULL, ts=50, data=T, split=T, all=F){
   }
   for (A in x){ D <- as.data.frame(getData(A, s, e)[,c(3,8)])
     
+    message(
+      sprintf(
+        "%s is downloaded (%s / %s)", 
+        A, which(x == A), length(x)
+      )
+    ) # Download message
+    
     D <- D[!duplicated(D),] # Remove duplicates
     
     D <- xts(D[,1], order.by = as.Date(D[,2])) # Move dates to row names
