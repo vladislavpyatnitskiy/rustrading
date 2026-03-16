@@ -30,7 +30,9 @@ rus.VaR.plt <- function(x, VaR = c(95), s=NULL, e=NULL){ # Plot of VaR
     t <- seq(nrow(s)) # Set index
     
     gm <- garchFit( ~ garch(1, 1), data = coredata(s), trace = F) # GARCH model
-    
+
+    par(mar = c(5, 4, 4, 4)) # Define borders of the plot to fit right y-axis
+                       
     plot(t, s, type="l", xlab = "Trading Days", ylab = Returns, las = 1,
          main = sprintf("%s VaR GARCH (1,1)", colnames(s)),
          sub = "Data Source: Moscow Exchange") # Plot graph
@@ -42,8 +44,6 @@ rus.VaR.plt <- function(x, VaR = c(95), s=NULL, e=NULL){ # Plot of VaR
     
     abline(h = 0)
     
-    axis(side = 4, las = 2) # Right y-axis
-    
-    par(mar = c(5, 4, 4, 4)) } # Define borders of the plot to fit right y-axis
+    axis(side = 4, las = 2) } # Right y-axis
 }
 rus.VaR.plt("LKOH", VaR = 95) # Test
