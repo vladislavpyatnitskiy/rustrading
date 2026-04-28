@@ -102,7 +102,7 @@ MACD.rus <- function(x, s=NULL, e=NULL, ts = 14, data=T){
   
   names(DF) <- colnames(x) 
   
-  #par(mar = rep(4, 4)) # Define borders of the plot
+  par(mar = rep(4, 4)) # Define borders of the plot
   
   for (n in 1:length(DF)){
     
