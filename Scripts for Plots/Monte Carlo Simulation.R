@@ -1,43 +1,80 @@
 lapply(c("moexer", "xts", "ggplot2", "data.table", "timeSeries"),
        require, character.only = T) # Libraries
 
-rus.monte.carlo <- function(x, ndays, n){ # Monte Carlo Simulation
+rus.monte.carlo <- function(x, ndays, m){ # Monte Carlo Simulation
   
-  P <- NULL # When Data from Yahoo! Finance needed
+  redom = list(
+    c("AGRO", "RAGR"), c("CIAN", "CNRU"), c("HHRU", "HEAD"), c("FIVE", "X5"),
+    c("FIXP", "FIXR"), c("YNDX", "YDEX"))
   
-  for (A in x){ 
+  from = "2007-01-01"
+  
+  J <- NULL
+  R <- NULL
+  L <- NULL
+  Av <- NULL
+  Plots <- NULL
+  
+  for (n in 1:length(x)){
     
-    D <- as.data.frame(
-      get_candles(
-        A, 
-        from = "2007-01-01",
-        interval = 'daily'
-        )[,c(3,8)]
+    if (any(sapply(redom, function(redom_item) x[n] %in% redom_item))){
+      
+      f <- which(sapply(redom, function(redom_item) x[n] %in% redom_item))
+      
+      for (k in 1:length(redom[[f]])){
+        
+        a = as.data.frame(
+          get_candles(redom[[f]][k], from=from, interval='daily')[,c(3,8)]
+        )
+        
+        if (k == 2){ 
+          
+          message(
+            sprintf(
+              "%s is downloaded; %s from %s", x[n], which(x == x[n]), length(x)
+            )
+          )
+        }
+        
+        a <- a[!duplicated(a),] # Remove duplicates
+        
+        a <- xts(a[, 1], order.by = as.Date(a[, 2]))
+        
+        if (x[n] == "AGRO") a <- a / 7.01
+        if (x[n] == "FIXP") a <- a / 100     
+        
+        colnames(a) <- redom[[f]][2]
+        
+        if (is.null(R)) R <- data.frame(a) else R <- rbind.data.frame(R, a)
+      }
+    } else {
+      
+      a = as.data.frame(get_candles(x[n], from=from, interval='daily')[,c(3,8)])
+      
+      message(
+        sprintf(
+          "%s is downloaded; %s from %s", 
+          x[n], which(x == x[n]), length(x)
+        )
       )
+      
+      a <- a[!duplicated(a),] # Remove duplicates
+      
+      a <- xts(a[, 1], order.by = as.Date(a[, 2]))
+      
+      colnames(a) <- x[n]
+      
+      R <- data.frame(a) 
+    }
     
-    message(
-      sprintf(
-        "%s is downloaded (%s / %s)", 
-        A, which(x == A), length(x)
-      )
-    ) # Download message
+    R <- as.timeSeries(R) # Make it time series
     
-    D <- D[!duplicated(D),] # Remove duplicates
+    if (x[n] == "BELU"){ j <- which(rownames(R) == "2024-08-15")
     
-    P <- cbind(P, xts(D[, 1], order.by = as.Date(D[, 2]))) }
+      R[c(1:j),] <- R[c(1:j),]/8 } # Adjustments for Novabev stock
     
-    P <- P[apply(P, 1, function(x) all(!is.na(x))),] # Reduce NA
-    
-    colnames(P) <- x 
-    
-    P <- as.timeSeries(P) # Make data Time Series
-    
-    L <- NULL
-    Av <- NULL
-    Plots <- NULL
-    
-    for (m in 1:ncol(P)){ c <- P[,m]
-    
+    c <- R
+    R <- NULL  # Reset R for next iteration
     r <- as.numeric(c / lag(c)) # Calculate returns
     r[1] <- 1 # Assign first observation as 1
     set.seed(0) # Calculate various scenarios of Stock Performance
@@ -45,21 +82,21 @@ rus.monte.carlo <- function(x, ndays, n){ # Monte Carlo Simulation
     # Mimic Historical Performance using log returns
     p <- data.table(
       apply(
-        replicate(n, expr = round(sample(r, ndays, replace=T), 2)), 2, cumprod
-        )
+        replicate(m, expr = round(sample(r, ndays, replace=T), 2)), 2, cumprod
       )
+    )
     
     p$days <- 1:nrow(p)
     p <- melt(p, id.vars = "days")
     
     # Make Line Charts with all scenarios
-    plt <- ggplot(p, aes(x=days,y=(value - 1) * 100, col=variable)) +
+    plt <- ggplot(p, aes(x = days, y = (value - 1) * 100, col = variable)) +
       geom_line() +
       theme_bw() +
       theme(legend.position = "none") +
       ggtitle(
         sprintf("%s Performance by Monte Carlo Simulation", colnames(c))
-        ) +
+      ) +
       xlab("Days Invested") + 
       ylab("Return (%)")
     
@@ -71,12 +108,21 @@ rus.monte.carlo <- function(x, ndays, n){ # Monte Carlo Simulation
     
     Av <- c(Av, as.vector(mean((p$value[p$days] - 1) * 100 < 0))) # Join
     
-    if (is.null(Plots)){ Plots <- plt } else { Plots <- list(Plots, plt) } }
-    
-  names(Av) <- x # Assign names
+    if (is.null(Plots)) Plots <- list(plt) else Plots[[n]] <- plt }
   
+  names(Plots) <- x
+  names(Av) <- x # Assign names
   rownames(L) <- x # Assign row names
   
-  list(Plots, L, Av) # Output
+  L <- as.data.frame(L)
+  
+  L <- L[order(-L$`Median`), ] # Sort by yield level
+  Av <- sort(Av, decreasing = F)
+  
+  DF <- list(Plots, L, Av) # Output
+  
+  names(DF) <- c("Plots", "Yield", "Means")
+  
+  DF
 }
 rus.monte.carlo(c("DIOD", "LKOH"), 1000, 100) # Test
