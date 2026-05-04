@@ -25,3 +25,20 @@ Fig. 6. Line Plot of Stock Volatility with Parametric VaR
 
 ![](https://github.com/vladislavpyatnitskiy/rustrading/blob/main/Plots/Monte%20Carlo.png?raw=true)
 Fig. 7. Monte Carlo Simulation for Russian Stocks
+
+```
+$Plots
+$Plots$DIOD
+
+$Plots$LKOH
+
+
+$Yield
+          Min.   1st Qu.   Median     Mean  3rd Qu.      Max.
+DIOD -84.48492 -22.31594 20.69516 63.22493 95.33475 1302.9911
+LKOH -87.49734 -27.68163 14.46442 44.58560 76.19595  669.9798
+
+$Means
+ DIOD  LKOH 
+0.687 0.999 
+```
