@@ -30,7 +30,7 @@ rus.VaR.plt <- function(x, VaR = c(95), s=NULL, e=NULL){ # Plot of VaR
   
   p <- as.timeSeries(p) # Display time series
   
-  if (isTRUE(lg)) { p = diff(log(p))[-1,] } # log returns 
+  if (lg) p = diff(log(p))[-1,] # log returns 
   
   for (n in 1:ncol(p)){ s <- p[,n]  # For each column in data set
     
