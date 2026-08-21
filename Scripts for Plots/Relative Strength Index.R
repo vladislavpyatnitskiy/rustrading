@@ -12,88 +12,102 @@ RSI.rus <- function(x, s=NULL, e=NULL, split=F, all=F){
     return(get_candles(A, from = s, till = e, interval = 'daily')) 
   }
   for (A in x){ D <- as.data.frame(getData(A, s, e)[,c(3,8)])
+  
+  message(
+    sprintf(
+      "%s is downloaded (%s / %s)", 
+      A, which(x == A), length(x)
+    )
+  ) # Download message
+  
+  D <- D[!duplicated(D),] # Remove duplicates
+  
+  D <- xts(D[,1], order.by = as.Date(D[,2])) # Move dates to row names
+  
+  colnames(D) <- A # Put the tickers in data set
+  
+  D <- as.timeSeries(D) # Make it time series
+  
+  if (A == "BELU" & isTRUE(split) &
+      (isTRUE(s < "2024-08-15" | e < "2024-08-15") |
+       isTRUE(is.null(s) | is.null(e)))){
     
-    message(
-      sprintf(
-        "%s is downloaded (%s / %s)", 
-        A, which(x == A), length(x)
-      )
-    ) # Download message
+    f <- which(rownames(D) == "2024-08-15")
     
-    D <- D[!duplicated(D),] # Remove duplicates
-    
-    D <- xts(D[,1], order.by = as.Date(D[,2])) # Move dates to row names
-    
-    colnames(D) <- A # Put the tickers in data set
-    
-    D <- as.timeSeries(D) # Make it time series
-    
-    if (A == "BELU" & isTRUE(split) &
-        (isTRUE(s < "2024-08-15" | e < "2024-08-15") |
-         isTRUE(is.null(s) | is.null(e)))){
-      
-      f <- which(rownames(D) == "2024-08-15")
-      
-      D[c(1:f),] <- D[c(1:f),] / 8 } # Adjustments for Novabev stock
-    
-    D <- D[apply(D, 1, function(x) all(!is.na(x))),] # Get rid of NA
-    
-    D <- diff(log(as.timeSeries(D)))[-1,]
-    
-    if (is.null(p)){ p <- list(D) } else { p[[A]] <- D } }
-
+    D[c(1:f),] <- D[c(1:f),] / 8 } # Adjustments for Novabev stock
+  
+  D <- D[apply(D, 1, function(x) all(!is.na(x))),] # Get rid of NA
+  
+  D <- diff(log(as.timeSeries(D)))[-1,]
+  
+  if (is.null(p)){ p <- list(D) } else { p[[A]] <- D } }
+  
   df <- NULL
   d <- NULL
-
-  for (m in 1:length(p)){ y <- p[[m]]
   
+  par(mar = rep(4, 4)) # Define borders of the plot
+  
+  for (m in 1:length(p)){ y <- p[[m]]
+    
     gains <- ifelse(y > 0, y, 0)
     losses <- ifelse(y < 0, -y, 0)
-  
+    
     G <- NULL
     L <- NULL
-  
+    
     for (n in 1:(nrow(y)-14)){
       
       G <- rbind.data.frame(G, mean(gains[n:(n+13),]))
       L <- rbind.data.frame(L, mean(losses[n:(n+13),]))
     }
-  
+    
     I <- 100 - (100 / (1 + G/L))
-  
+    
     dates <- rownames(y)[15:nrow(y)]
-  
+    
     rownames(I) <- dates
     colnames(I) <- colnames(y)
-  
+    
     I <- as.timeSeries(I)
-  
+    
     plot(
       I,
-      ylab = "RSI",
+      ylab = "",
       xlab = "Trading Days",
-      main = sprintf("Relative Strength Index of %s", colnames(y)),
-      las = 1
+      main = sprintf("Relative Strength Index (RSI) of %s", colnames(y)),
+      las = 1,
+      ylim = c(0, 100)
     )
-  
-    axis(side = 4, las = 2) # Right Y-Axis Values
-  
+    
+    p.seq <- seq(from = 0, to = 100, by = 10)
+    axis(side = 2, at = p.seq, las = 1, labels = p.seq)
+    axis(side = 4, at = p.seq, las = 1, labels = p.seq)
     grid(nx = 1, ny = NULL, lty = 3, col = "grey") # Horizontal lines
-  
-    abline(h = 30, col = "green", lwd = 3) #
-    abline(h = 70, col = "red", lwd = 3) #
-  
+    
+    #abline(h = p.seq, col = "grey", lwd = 1, lty = 3) # grid lines
+    abline(h = 0)
+    abline(h = 100)#
+    
+    c <- c(
+      "darkred", "red3", "red", "orange", "gold", 
+      "greenyellow", "green", "limegreen", "blue"
+      )
+    
+    v <- c(90, 80, 70, 60, 50, 40, 30, 20, 10)
+    
+    for (n in 1:length(v)){ abline(h = v[n], col = c[n], lwd = 2) } # Lines
+    
     A <- I[nrow(I),]
-  
+    
     d <- c(d, if (A < 30) "Buy" else if (A > 70) "Sell" else "Hold")
-  
+    
     df <- c(df, A)
   }
-
+  
   D <- cbind.data.frame(x, df, d)
-
+  
   colnames(D) <- c("Ticker", "RSI", "Signal")
-
+  
   D[order(-D$RSI), ] # Sort by price change level
 }
 RSI.rus(c("GMKN", "BELU"), s="2025-01-01")
