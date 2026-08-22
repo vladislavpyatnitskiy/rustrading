@@ -36,15 +36,11 @@ lines.plt.ma.rus <- function(x, s=NULL, e=NULL, ts=50, data=T, split=T, all=F){
       
       D[c(1:f),] <- D[c(1:f),] / 8 } # Adjustments for Novabev stock
     
-    p <- cbind(p, D) } # Merge
-    
-    if (!all) p <- p[apply(p, 1, function(x) all(!is.na(x))),] # Get rid of NA
-    
-    x <- as.timeSeries(p)
+    if (is.null(p)){ p <- list(D) } else { p[[A]] <- D } }
   
   DF <- NULL # Where to contain data frames
   
-  for (i in 1:ncol(x)){ y <- x[,i]
+  for (i in 1:length(p)){ y <- p[[i]]
     
     MA <- NULL # Where to put all moving averages
     
@@ -77,11 +73,9 @@ lines.plt.ma.rus <- function(x, s=NULL, e=NULL, ts=50, data=T, split=T, all=F){
     if (is.null(DF)){ DF <- list(MA) } else { DF[[i]] <- MA } } # Put into list
     
   names(DF) <- colnames(x) 
-
-  par(mar = c(8, rep(4, 3))) # Define borders of the plot
-                           
+  
   for (n in 1:length(DF)){ p <- DF[[n]]
-                          
+    
     plot(
       p[,1],
       ylim = c(min(p), max(p)),
@@ -101,6 +95,8 @@ lines.plt.ma.rus <- function(x, s=NULL, e=NULL, ts=50, data=T, split=T, all=F){
     abline(h = 0) # Add black horizontal line at break even point
     
     for (m in 2:(ncol(p))){ lines(p[,m], col = m, lwd = 2) } # Plot indices
+    
+    par(mar = c(8, rep(4, 3))) # Define borders of the plot
     
     legend(
       x = "bottom",
