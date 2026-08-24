@@ -12,13 +12,6 @@ MACD.rus <- function(x, s=NULL, e=NULL, ts = 14, data=T){
     return(get_candles(A, from = s, till = e, interval = 'daily')) 
   }
   for (A in x){ D <- as.data.frame(getData(A, s, e)[,c(3,8)])
-
-    message(
-      sprintf(
-        "%s is downloaded (%s / %s)", 
-        A, which(x == A), length(x)
-      )
-    ) # Download message
     
     D <- D[!duplicated(D),] # Remove duplicates
     
@@ -36,15 +29,11 @@ MACD.rus <- function(x, s=NULL, e=NULL, ts = 14, data=T){
       
       D[c(1:f),] <- D[c(1:f),] / 8 } # Adjustments for Novabev stock
     
-    p <- cbind(p, D) } # Merge
-    
-  p <- p[apply(p, 1, function(x) all(!is.na(x))),] # Get rid of NA
-  
-  x <- as.timeSeries(p)
+    if (is.null(p)){ p <- list(D) } else { p[[A]] <- D } }
   
   DF <- NULL # Where to contain data frames
   
-  for (i in 1:ncol(x)){ y <- x[,i]
+  for (i in 1:length(p)){ y <- p[[i]]
     
     MA <- NULL # Where to put all moving averages
     
@@ -106,13 +95,39 @@ MACD.rus <- function(x, s=NULL, e=NULL, ts = 14, data=T){
   
   for (n in 1:length(DF)){
     
-    plot(DF[[n]][,4], col = "red", las = 1, xlab = "Trading Days",
-         main = sprintf("%s %s", colnames(DF[[n]])[1],
-                        "Moving Average Convergence Divergence"))
+    plot(
+      DF[[n]][,4], 
+      col = "red", 
+      las = 1, 
+      xlab = "Trading Days",
+      main = sprintf(
+        "%s %s", colnames(DF[[n]])[1],
+        "Moving Average Convergence Divergence"
+        )
+      )
     
     lines(DF[[n]][,5], col = "blue")
     
-    lines(DF[[n]][,6], col = "black", type = "h")
+    lines(
+      replace(
+        DF[[n]][,6], 
+        DF[[n]][,6] < 0, 
+        NA
+        ), 
+      col = "darkgreen", 
+      type = "h"
+      )
+    
+    lines(
+      replace(
+        DF[[n]][,6], 
+        DF[[n]][,6] > 0, 
+        NA
+        ), 
+      col = "red3", 
+      type = "h"
+      )
+    
     axis(side = 4, las = 2) # Right Y-Axis Values
     
     grid(nx = 1, ny = NULL, lty = 3, col = "grey") # Horizontal lines
