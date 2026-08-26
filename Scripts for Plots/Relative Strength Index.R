@@ -84,7 +84,6 @@ RSI.rus <- function(x, s=NULL, e=NULL, split=F, all=F){
     axis(side = 4, at = p.seq, las = 1, labels = p.seq)
     grid(nx = 1, ny = NULL, lty = 3, col = "grey") # Horizontal lines
     
-    #abline(h = p.seq, col = "grey", lwd = 1, lty = 3) # grid lines
     abline(h = 0)
     abline(h = 100)#
     
@@ -99,7 +98,20 @@ RSI.rus <- function(x, s=NULL, e=NULL, split=F, all=F){
     
     A <- I[nrow(I),]
     
-    d <- c(d, if (A < 30) "Buy" else if (A > 70) "Sell" else "Hold")
+    d <- c(
+      d,
+      if (A < 10) "Definitely Buy"
+      else if (A < 20) "Excellent time to buy"
+      else if (A < 30) "Good time to buy"
+      else if (A < 40) "You may buy a little"
+      else if (A < 50) "Hold"
+      else if (A < 60) "You may sell a little"
+      else if (A < 70) "Good time to sell"
+      else if (A < 80) "Excellent time to sell"
+      else if (A < 90) "Definitely Sell"
+      else if (A >= 90) "SELL!!!" 
+      #else "Hold"
+      )
     
     df <- c(df, A)
   }
